@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tareas</title>
+    <link rel = "stylesheet" href = "{{url_for('static',filename = 'style.css')}}">
+</head>
+<body>
+<h1>Verificando coneccion con la base de datos</h1>
+<h2>{{mensaje}}</h2>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Tipo</th>
+        <th>Detalle</th>
+        <th>Estado</th>
+    </tr>
+    {% for row in resul %}
+    <tr>
+        <td>{{row[0]}}</td>
+        <td>{{row[1]}}</td>
+        <td>{{row[2]}}</td>
+        <td><input type="checkbox" id={{row[3]}} name={{row[3]}} value="Bike" onchange="{{url_for('cambio')}}"></td>
+
+    </tr>
+    {% endfor %}
+    <h2>Añade una nueva tarea</h2>
+    <form action="{{url_for('index')}}" method="POST">
+        <label for="tipo">Tipo:</label>
+        <input type="text" id="tipo" name="tipo" required><br>
+        <label for="detalle">Descripción:</label>
+        <input type="text" id="detalle" name="detalle" required>
+        <button type="submit">Agregar</button>
+    </form>
+</table>
+</body>
+</html>

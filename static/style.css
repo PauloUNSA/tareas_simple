@@ -1,0 +1,15 @@
+body {
+    margin: 2em;
+}
+table {
+    margin: 2em;
+}
+tr:nth-child(even) {
+    background-color: lightblue;
+}
+th {
+    padding-right: 2.5em;
+}
+td {
+    padding: .5em;
+}
