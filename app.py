@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify,redirect, url_for
 import mysql.connector
-from flask import jsonify
 
 app = Flask(__name__)
-print('hola munfo')
+print('hola mundo')
+
 try:
     '''mydb = mysql.connector.connect(
       host="PauloHidalgo.mysql.pythonanywhere-services.com",
@@ -36,19 +36,22 @@ def add_tarea(tipo,detalle):
 
 def change_state(id,valor):#funcion que sirve para cambiar el estado de la tarea a terminado
     query = "UPDATE lista SET estado=%s WHERE id=%s;"
-
-  #  UPDATE Customers
- #   SET ContactName = 'Alfred Schmidt', City= 'Frankfurt'
-#WHERE CustomerID = 1;
-    '''if valor == "0":
-        print("se cambio a 1")
-        valor = 1
-    else:
-        print("se cambio a 0")
-        valor = 0'''
     valores = (int(valor), int(id))
     mycursor.execute(query, valores)
     mydb.commit()
+
+def delete_element(id):#funcion que sirve para cambiar el estado de la tarea a terminado
+    try:
+        if not mydb.is_connected():
+            mydb.reconnect()  # 🔄 Reconecta si está desconectado
+
+        query = "DELETE FROM lista WHERE id=%s;"
+        valores = (int(id),)
+        mycursor.execute(query, valores)
+        mydb.commit()
+
+    except mysql.connector.Error as err:
+        print(f"Error en MySQL: {err}")  # 📌 Muestra errores en la consola
 
 @app.route('/', methods = ['GET','POST'])
 def index():
@@ -57,28 +60,15 @@ def index():
         detalle = request.form['detalle']
         add_tarea(tipo,detalle)
         print("asdfghjklñ")
+        return redirect(url_for('index'))
     #return 'Hola desde flask!'
     mycursor.execute("SELECT * FROM lista")
     myresult = mycursor.fetchall()
     return render_template('index.html', mensaje =  message, resul = myresult)
 
-'''@app.route('/cambio', methods = ['GET','POST'])
-def cambio():
-    print("en cambio")
-    if request.method == 'POST':
-        id = request.form['id']
-        valor = request.form['valor']
-        print("asdfghjklñ")
-        print(id)
-        print(valor)
-        change_state(id,valor)
-    mycursor.execute("SELECT * FROM lista")
-    myresult = mycursor.fetchall()
-    return render_template('index.html', mensaje =  message, resul = myresult)'''
-
-
 
 @app.route('/cambio', methods=['POST'])
+
 def cambio():
     print("en cambio")
     id = request.form['id']
@@ -88,4 +78,14 @@ def cambio():
     change_state(id, valor)  # Tu función para actualizar en la base de datos
 
     # Responde con un JSON para evitar errores en `fetch()`
-    return jsonify({"status": "success", "id": id, "valor": valor})
+    return (jsonify({"status": "success", "id": id, "valor": valor}))
+
+@ app.route('/eliminar', methods=['POST'])
+def eliminar():
+    print("en eliminacion")
+    id = request.form['id']
+    print("ID:", id)
+    delete_element(id)  # Tu función para actualizar en la base de datos
+
+    # Responde con un JSON para evitar errores en `fetch()`
+    return (jsonify({"status": "success", "id": id}))

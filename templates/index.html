@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Tareas</title>
-    <link rel = "stylesheet" href = "{{url_for('static',filename = 'style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename = 'style.css') }}">
 </head>
 <body>
 <h1>Verificando coneccion con la base de datos</h1>
-<h2>{{mensaje}}</h2>
+<h2>{{ mensaje }}</h2>
 <table>
     <tr>
         <th>ID</th>
@@ -16,30 +16,28 @@
         <th>Estado</th>
     </tr>
     {% for row in resul %}
-    <tr>
-        <td>{{row[0]}}</td>
-        <td>{{row[1]}}</td>
-        <td>{{row[2]}}</td>
-        <td>
-            <!---<form action="{{url_for('cambio')}}" method="POST">
-                <input type="hidden" id="valor" name="valor" value="{{ row[3] }}">
-                <input type="hidden" id="id" name="id" value="{{row[0]}}">
-                <input type="checkbox"  onchange="this.form.submit()"
-                        {% if row[3] == 1 %} checked="checked" {% endif %}>
-            </form>--->
-        <form id="checkboxForm{{ row[0] }}" action="{{ url_for('cambio') }}" method="POST">
-    <input type="hidden" name="id" value="{{ row[0] }}">
-    <input type="hidden" name="valor" id="valor{{ row[0] }}" value="{{ row[3] }}">
-    <input type="checkbox" id="checkbox{{ row[0] }}"
-           {% if row[3] == 1 %} checked="checked" {% endif %}
-           onchange="enviarCambio({{ row[0] }})">
-</form>
-
-        </td>
-    </tr>
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>
+                <form id="checkboxForm{{ row[0] }}">
+                    <input type="hidden" name="valor" id="valor{{ row[0] }}" value="{{ row[3] }}">
+                    <input type="checkbox" id="checkbox{{ row[0] }}"
+                            {% if row[3] == 1 %} checked="checked" {% endif %}
+                           onchange="enviarCambio({{ row[0] }})">
+                </form>
+            </td>
+            <td>
+                <form id="deleteForm{{ row[0] }}" >
+                    <input type="hidden" name="id" value="{{ row[0] }}">
+                    <input type="button" value="Eliminar" onclick="enviarEliminacion({{ row[0] }})">
+                </form>
+            </td>
+        </tr>
     {% endfor %}
     <h2>Añade una nueva tarea</h2>
-    <form action="{{url_for('index')}}" method="POST">
+    <form action="{{ url_for('index') }}" method="POST">
         <label for="tipo">Tipo:</label>
         <input type="text" id="tipo" name="tipo" required><br>
         <label for="detalle">Descripción:</label>
@@ -73,4 +71,23 @@
             }
         }).catch(error => console.error("Error:", error));
     }
+    function enviarEliminacion(id) {
+
+    let formData = new FormData();
+    formData.append("id", id);
+
+    fetch("{{ url_for('eliminar') }}", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log("Eliminado correctamente");
+            location.reload(); // Recarga la página para actualizar la lista
+        } else {
+            console.error("Error en la solicitud");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
 </script>
