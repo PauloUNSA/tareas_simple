@@ -20,8 +20,22 @@
         <td>{{row[0]}}</td>
         <td>{{row[1]}}</td>
         <td>{{row[2]}}</td>
-        <td><input type="checkbox" id={{row[3]}} name={{row[3]}} value="Bike" onchange="{{url_for('cambio')}}"></td>
+        <td>
+            <!---<form action="{{url_for('cambio')}}" method="POST">
+                <input type="hidden" id="valor" name="valor" value="{{ row[3] }}">
+                <input type="hidden" id="id" name="id" value="{{row[0]}}">
+                <input type="checkbox"  onchange="this.form.submit()"
+                        {% if row[3] == 1 %} checked="checked" {% endif %}>
+            </form>--->
+        <form id="checkboxForm{{ row[0] }}" action="{{ url_for('cambio') }}" method="POST">
+    <input type="hidden" name="id" value="{{ row[0] }}">
+    <input type="hidden" name="valor" id="valor{{ row[0] }}" value="{{ row[3] }}">
+    <input type="checkbox" id="checkbox{{ row[0] }}"
+           {% if row[3] == 1 %} checked="checked" {% endif %}
+           onchange="enviarCambio({{ row[0] }})">
+</form>
 
+        </td>
     </tr>
     {% endfor %}
     <h2>Añade una nueva tarea</h2>
@@ -35,3 +49,28 @@
 </table>
 </body>
 </html>
+<script>
+    function enviarCambio(id) {
+        let checkbox = document.getElementById("checkbox" + id);
+        let valorInput = document.getElementById("valor" + id);
+
+        // Alterna el valor entre 1 y 0
+        let nuevoValor = checkbox.checked ? 1 : 0;
+        valorInput.value = nuevoValor; // Actualiza el valor en el input hidden
+
+        // Crea un objeto con los datos a enviar
+        let formData = new FormData();
+        formData.append("id", id);
+        formData.append("valor", nuevoValor);
+
+        // Envía la solicitud de manera asíncrona con Fetch API
+        fetch("{{ url_for('cambio') }}", {
+            method: "POST",
+            body: formData
+        }).then(response => {
+            if (!response.ok) {
+                console.error("Error en la solicitud");
+            }
+        }).catch(error => console.error("Error:", error));
+    }
+</script>
