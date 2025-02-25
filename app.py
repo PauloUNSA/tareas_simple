@@ -24,7 +24,6 @@ try:
       #print(x)
 except mysql.connector.Error as e:
     print(e)
-
     myresult = ['#']
     message = 'NO estas conectado a la db'
 
@@ -43,7 +42,7 @@ def change_state(id,valor):#funcion que sirve para cambiar el estado de la tarea
 def delete_element(id):#funcion que sirve para cambiar el estado de la tarea a terminado
     try:
         if not mydb.is_connected():
-            mydb.reconnect()  # 🔄 Reconecta si está desconectado
+            mydb.reconnect()  # Reconecta si está desconectado
 
         query = "DELETE FROM lista WHERE id=%s;"
         valores = (int(id),)
@@ -51,7 +50,14 @@ def delete_element(id):#funcion que sirve para cambiar el estado de la tarea a t
         mydb.commit()
 
     except mysql.connector.Error as err:
-        print(f"Error en MySQL: {err}")  # 📌 Muestra errores en la consola
+        print(f"Error en MySQL: {err}")  # Muestra errores en la consola
+
+def update_tarea(id_tarea, tipo, detalle):
+    query = "UPDATE lista SET tipo=%s, detalle=%s WHERE id=%s"
+    mycursor.execute(query, (tipo, detalle, id_tarea))
+    mydb.commit()
+    #cursor.close()
+    #conn.close()
 
 @app.route('/', methods = ['GET','POST'])
 def index():
@@ -59,9 +65,7 @@ def index():
         tipo = request.form['tipo']
         detalle = request.form['detalle']
         add_tarea(tipo,detalle)
-        print("asdfghjklñ")
         return redirect(url_for('index'))
-    #return 'Hola desde flask!'
     mycursor.execute("SELECT * FROM lista")
     myresult = mycursor.fetchall()
     return render_template('index.html', mensaje =  message, resul = myresult)
@@ -70,11 +74,11 @@ def index():
 @app.route('/cambio', methods=['POST'])
 
 def cambio():
-    print("en cambio")
+    #print("en cambio")
     id = request.form['id']
     valor = request.form['valor']
-    print("ID:", id)
-    print("Nuevo Valor:", valor)
+    #print("ID:", id)
+    #print("Nuevo Valor:", valor)
     change_state(id, valor)  # Tu función para actualizar en la base de datos
 
     # Responde con un JSON para evitar errores en `fetch()`
@@ -82,10 +86,23 @@ def cambio():
 
 @ app.route('/eliminar', methods=['POST'])
 def eliminar():
-    print("en eliminacion")
+    #print("en eliminacion")
     id = request.form['id']
-    print("ID:", id)
+    #print("ID:", id)
     delete_element(id)  # Tu función para actualizar en la base de datos
 
     # Responde con un JSON para evitar errores en `fetch()`
+    return (jsonify({"status": "success", "id": id}))
+
+@ app.route('/modificar', methods=['POST'])
+def modificar():
+    print("en modificacion")
+    id = request.form['id']
+    tipo = request.form['tipo']
+    detalle = request.form['detalle']
+
+    # Lógica para actualizar en la base de datos
+    update_tarea(id, tipo, detalle)
+
+    #return render_template('editar.html', id=id_tarea, tipo=tipo, detalle=detalle)
     return (jsonify({"status": "success", "id": id}))

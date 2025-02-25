@@ -34,6 +34,12 @@
                     <input type="button" value="Eliminar" onclick="enviarEliminacion({{ row[0] }})">
                 </form>
             </td>
+        <td>
+        <!-- Botón de Edición con Icono -->
+        <button onclick="editarTarea({{ row[0] }}, '{{ row[1] }}', '{{ row[2] }}')">
+            ✏️
+        </button>
+    </td>
         </tr>
     {% endfor %}
     <h2>Añade una nueva tarea</h2>
@@ -72,7 +78,6 @@
         }).catch(error => console.error("Error:", error));
     }
     function enviarEliminacion(id) {
-
     let formData = new FormData();
     formData.append("id", id);
 
@@ -89,5 +94,32 @@
         }
     })
     .catch(error => console.error("Error:", error));
+}
+function editarTarea(id, tipo, detalle) {
+    // Mostrar un formulario de edición (puede ser un modal)
+    let nuevoTipo = prompt("Nuevo tipo:", tipo);
+    let nuevoDetalle = prompt("Nuevo detalle:", detalle);
+
+    if (nuevoTipo !== null && nuevoDetalle !== null) {
+        // Crear un objeto con los nuevos valores
+        let formData = new FormData();
+        formData.append("id", id);
+        formData.append("tipo", nuevoTipo);
+        formData.append("detalle", nuevoDetalle);
+
+        // Enviar la solicitud con Fetch API
+        fetch("/modificar", {
+            method: "POST",
+            body: formData
+        }).then(response => {
+        if (response.ok) {
+            console.log("Modificado correctamente");
+            location.reload(); // Recarga la página para actualizar la lista
+        } else {
+            console.error("Error en la solicitud");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+    }
 }
 </script>
